@@ -1,0 +1,143 @@
+#include "main.h"
+
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+
+static inline void led_on(GPIO_TypeDef* port, uint16_t pin)  { HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET); }
+static inline void led_off(GPIO_TypeDef* port, uint16_t pin) { HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);   }
+
+static void setDir(GPIO_TypeDef* R_port, uint16_t R_pin,
+                   GPIO_TypeDef* Y_port, uint16_t Y_pin,
+                   GPIO_TypeDef* G_port, uint16_t G_pin,
+                   int r, int y, int g)
+{
+  (r ? led_on : led_off)(R_port, R_pin);
+  (y ? led_on : led_off)(Y_port, Y_pin);
+  (g ? led_on : led_off)(G_port, G_pin);
+}
+
+static void allOff(void)
+{
+  led_off(N_RED_GPIO_Port, N_RED_Pin);
+  led_off(N_YEL_GPIO_Port, N_YEL_Pin);
+  led_off(N_GRN_GPIO_Port, N_GRN_Pin);
+  led_off(S_RED_GPIO_Port, S_RED_Pin);
+  led_off(S_YEL_GPIO_Port, S_YEL_Pin);
+  led_off(S_GRN_GPIO_Port, S_GRN_Pin);
+  led_off(E_RED_GPIO_Port, E_RED_Pin);
+  led_off(E_YEL_GPIO_Port, E_YEL_Pin);
+  led_off(E_GRN_GPIO_Port, E_GRN_Pin);
+  led_off(W_RED_GPIO_Port, W_RED_Pin);
+  led_off(W_YEL_GPIO_Port, W_YEL_Pin);
+  led_off(W_GRN_GPIO_Port, W_GRN_Pin);
+}
+
+#define T_GREEN   5000
+#define T_YELLOW  2000
+#define T_ALLRED  1000
+
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  allOff();
+
+  while (1)
+  {
+    setDir(N_RED_GPIO_Port, N_RED_Pin, N_YEL_GPIO_Port, N_YEL_Pin, N_GRN_GPIO_Port, N_GRN_Pin, 0,0,1);
+    setDir(S_RED_GPIO_Port, S_RED_Pin, S_YEL_GPIO_Port, S_YEL_Pin, S_GRN_GPIO_Port, S_GRN_Pin, 0,0,1);
+    setDir(E_RED_GPIO_Port, E_RED_Pin, E_YEL_GPIO_Port, E_YEL_Pin, E_GRN_GPIO_Port, E_GRN_Pin, 1,0,0);
+    setDir(W_RED_GPIO_Port, W_RED_Pin, W_YEL_GPIO_Port, W_YEL_Pin, W_GRN_GPIO_Port, W_GRN_Pin, 1,0,0);
+    HAL_Delay(T_GREEN);
+
+    setDir(N_RED_GPIO_Port, N_RED_Pin, N_YEL_GPIO_Port, N_YEL_Pin, N_GRN_GPIO_Port, N_GRN_Pin, 0,1,0);
+    setDir(S_RED_GPIO_Port, S_RED_Pin, S_YEL_GPIO_Port, S_YEL_Pin, S_GRN_GPIO_Port, S_GRN_Pin, 0,1,0);
+    HAL_Delay(T_YELLOW);
+
+    setDir(N_RED_GPIO_Port, N_RED_Pin, N_YEL_GPIO_Port, N_YEL_Pin, N_GRN_GPIO_Port, N_GRN_Pin, 1,0,0);
+    setDir(S_RED_GPIO_Port, S_RED_Pin, S_YEL_GPIO_Port, S_YEL_Pin, S_GRN_GPIO_Port, S_GRN_Pin, 1,0,0);
+    HAL_Delay(T_ALLRED);
+
+    setDir(E_RED_GPIO_Port, E_RED_Pin, E_YEL_GPIO_Port, E_YEL_Pin, E_GRN_GPIO_Port, E_GRN_Pin, 0,0,1);
+    setDir(W_RED_GPIO_Port, W_RED_Pin, W_YEL_GPIO_Port, W_YEL_Pin, W_GRN_GPIO_Port, W_GRN_Pin, 0,0,1);
+    setDir(N_RED_GPIO_Port, N_RED_Pin, N_YEL_GPIO_Port, N_YEL_Pin, N_GRN_GPIO_Port, N_GRN_Pin, 1,0,0);
+    setDir(S_RED_GPIO_Port, S_RED_Pin, S_YEL_GPIO_Port, S_YEL_Pin, S_GRN_GPIO_Port, S_GRN_Pin, 1,0,0);
+    HAL_Delay(T_GREEN);
+
+    setDir(E_RED_GPIO_Port, E_RED_Pin, E_YEL_GPIO_Port, E_YEL_Pin, E_GRN_GPIO_Port, E_GRN_Pin, 0,1,0);
+    setDir(W_RED_GPIO_Port, W_RED_Pin, W_YEL_GPIO_Port, W_YEL_Pin, W_GRN_GPIO_Port, W_GRN_Pin, 0,1,0);
+    HAL_Delay(T_YELLOW);
+
+    setDir(E_RED_GPIO_Port, E_RED_Pin, E_YEL_GPIO_Port, E_YEL_Pin, E_GRN_GPIO_Port, E_GRN_Pin, 1,0,0);
+    setDir(W_RED_GPIO_Port, W_RED_Pin, W_YEL_GPIO_Port, W_YEL_Pin, W_GRN_GPIO_Port, W_GRN_Pin, 1,0,0);
+    HAL_Delay(T_ALLRED);
+  }
+}
+
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  HAL_GPIO_WritePin(GPIOA, N_RED_Pin|N_YEL_Pin|N_GRN_Pin, GPIO_PIN_RESET);
+
+  HAL_GPIO_WritePin(GPIOB, S_RED_Pin|S_YEL_Pin|S_GRN_Pin|E_RED_Pin
+                          |E_YEL_Pin|E_GRN_Pin|W_RED_Pin|W_YEL_Pin
+                          |W_GRN_Pin, GPIO_PIN_RESET);
+
+  GPIO_InitStruct.Pin = N_RED_Pin|N_YEL_Pin|N_GRN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Pin = S_RED_Pin|S_YEL_Pin|S_GRN_Pin|E_RED_Pin
+                          |E_YEL_Pin|E_GRN_Pin|W_RED_Pin|W_YEL_Pin
+                          |W_GRN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+}
+
+void Error_Handler(void)
+{
+  __disable_irq();
+  while (1) {}
+}
+
+#ifdef USE_FULL_ASSERT
+void assert_failed(uint8_t *file, uint32_t line)
+{
+}
+#endif
