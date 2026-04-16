@@ -1,0 +1,22 @@
+# Proteus backup files
+*.pdsbak
+
+# STM32CubeIDE build artifacts
+Debug/
+Release/
+*.o
+*.d
+*.elf
+*.bin
+*.map
+*.list
+
+# IDE settings
+.settings/
+.project
+.cproject
+.mxproject
+
+# OS files
+.DS_Store
+Thumbs.db
